@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batu Gunting Kertas - Alexlyprogram </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .choice {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .choice:hover {
+            transform: translateY(-10px) scale(1.05);
+        }
+        
+        .choice.selected {
+            box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.5);
+        }
+        
+        .result-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateY(0); }
+            25% { transform: translateY(-20px); }
+            50% { transform: translateY(0); }
+            75% { transform: translateY(-10px); }
+        }
+        
+        .shake {
+            animation: shake 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .bot-difficulty-dots {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+        }
+        
+        .floating-element {
+            animation: float 5s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .bg-pattern {
+            background-image: radial-gradient(circle, rgba(0,0,0,0.05) 2px, transparent 2px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-pattern relative overflow-x-hidden">
+    <!-- Floating decorative elements -->
+    <div class="absolute top-20 left-10 w-16 h-16 rounded-full bg-blue-200 opacity-30 floating-element"></div>
+    <div class="absolute bottom-1/4 right-20 w-24 h-24 rounded-full bg-red-200 opacity-30 floating-element" style="animation-delay: 1s;"></div>
+    <div class="absolute top-1/3 right-1/4 w-20 h-20 rounded-full bg-yellow-200 opacity-30 floating-element" style="animation-delay: 2s;"></div>
+    
+    <div class="container mx-auto px-4 py-10">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-gray-800 mb-4">Batu Gunting Kertas</h1>
+            <p class="text-xl text-gray-600">Mainkan melawan Alexlyprogram dengan 3 tingkat kesulitan berbeda</p>
+        </header>
+        
+        <!-- Game area -->
+        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8 relative">
+            <!-- Difficulty selector -->
+            <div class="mb-8 text-center">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Pilih Tingkat Kesulitan:</h2>
+                <div class="flex flex-col space-y-4 w-full max-w-xs mx-auto">
+                    <button onclick="setDifficulty('easy')" class="difficulty-btn bg-green-100 hover:bg-green-200 border-green-400 text-green-800 px-6 py-3 rounded-lg font-medium transition w-full" data-difficulty="easy">
+                        <div class="flex items-center space-x-2 justify-center">
+                            <div class="bot-difficulty-dots bg-green-500"></div>
+                            <span>Mudah</span>
+                        </div>
+                    </button>
+                    <button onclick="setDifficulty('medium')" class="difficulty-btn bg-yellow-100 hover:bg-yellow-200 border-yellow-400 text-yellow-800 px-6 py-3 rounded-lg font-medium transition w-full" data-difficulty="medium">
+                        <div class="flex items-center space-x-2 justify-center">
+                            <div class="bot-difficulty-dots bg-yellow-500"></div>
+                            <div class="bot-difficulty-dots bg-yellow-500"></div>
+                            <span>Biasa</span>
+                        </div>
+                    </button>
+                    <button onclick="setDifficulty('hard')" class="difficulty-btn bg-red-100 hover:bg-red-200 border-red-400 text-red-800 px-6 py-3 rounded-lg font-medium transition w-full" data-difficulty="hard">
+                        <div class="flex items-center space-x-2 justify-center">
+                            <div class="bot-difficulty-dots bg-red-500"></div>
+                            <div class="bot-difficulty-dots bg-red-500"></div>
+                            <div class="bot-difficulty-dots bg-red-500"></div>
+                            <span>Mustahil</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Visual representation -->
+            <div class="flex flex-col items-center mb-12 relative">
+                <div class="flex justify-between w-full items-center">
+                    <div class="player-area text-center w-1/3 flex flex-col items-center h-full justify-between">
+                        <div class="mb-4">
+                            <div class="w-40 h-40 mx-auto rounded-full bg-blue-500 text-white text-6xl flex items-center justify-center border-4 border-blue-500" id="player-avatar">👤</div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-700 flex-grow flex items-end justify-center">Anda</h3>
+                    </div>
+                    
+                    <div class="versus text-center w-1/3">
+                        <div class="vs-circle bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto shadow-inner -mt-8">
+                            <span class="text-3xl font-bold text-gray-600">VS</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bot-area text-center w-1/3 flex flex-col items-center">
+                        <div class="w-40 h-40 mx-auto rounded-full bg-red-500 text-white text-6xl flex items-center justify-center border-4 border-red-500 mb-4" id="bot-avatar">🤖</div>
+                        <h3 class="text-xl font-semibold text-gray-700"><span id="bot-name">AI</span></h3>
+                    </div>
+                </div>
+
+                <div class="mt-8 w-full">
+                    <div class="result-display text-center py-4 px-6 bg-gray-100 rounded-full inline-block" id="result-text">
+                        <p class="text-gray-600">Pertarungan dimulai!</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between w-full mt-8">
+                    <div class="current-choice flex flex-col justify-center items-center h-32 w-1/2 py-4" id="player-choice">
+                        <span class="text-6xl mb-2"></span>
+                        <p class="text-gray-500 text-center">Pilihan Anda</p>
+                    </div>
+                    <div class="current-choice flex flex-col justify-center items-center h-32 w-1/2 py-4" id="bot-choice">
+                        <span class="text-6xl mb-2"></span>
+                        <p class="text-gray-500 text-center">Pilihan Lawan</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Choices -->
+            <div class="choices grid grid-cols-3 gap-6 mb-8 items-stretch">
+                <div class="choice flex flex-col bg-white p-6 rounded-xl shadow-md text-center transition" onclick="selectChoice('rock')">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/46e2cff4-3de4-4d73-a8ea-9c2d8f333bb7.png" alt="Stone rock illustration" class="w-full h-32 object-contain mb-4 mx-auto">
+                    <h3 class="text-lg font-semibold text-gray-700">Batu</h3>
+                </div>
+                <div class="choice bg-white p-6 rounded-xl shadow-md text-center transition" onclick="selectChoice('paper')">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e1e467c8-27fe-41d1-a0e3-5442c0847176.png" alt="Paper sheet illustration with folded corners and clean white color" class="w-full h-32 object-contain mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700">Kertas</h3>
+                </div>
+                <div class="choice bg-white p-6 rounded-xl shadow-md text-center transition" onclick="selectChoice('scissors')">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a637aa09-826f-488c-bcaa-d03a15cf0824.png" alt="Scissors illustration with metal blades and red handles" class="w-full h-32 object-contain mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700">Gunting</h3>
+                </div>
+            </div>
+            
+            <!-- Score -->
+            <div class="score-board bg-gray-100 rounded-xl p-6 text-center">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Skor</h3>
+                <div class="flex justify-around">
+                    <div class="player-score">
+                        <p class="text-gray-600">Anda</p>
+                        <p class="text-3xl font-bold text-blue-600" id="player-score">0</p>
+                    </div>
+                    <div class="divider w-px bg-gray-300"></div>
+                    <div class="bot-score">
+                        <p class="text-gray-600"><span id="bot-name-2">AI</span></p>
+                        <p class="text-3xl font-bold text-red-600" id="bot-score">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="mt-16 py-6 text-center text-gray-500">
+        <p>Alexlyprogram © 2025</p>
+    </footer>
+    
+    <!-- Result overlay -->
+    <div class="result-overlay fixed inset-0 flex items-center justify-center hidden" id="result-overlay">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full text-center mx-4">
+            <h2 class="text-3xl font-bold mb-4" id="final-result-text">Anda Menang!</h2>
+            <p class="text-xl mb-6" id="result-description">Selamat, Anda mengalahkan AI!</p>
+            <div class="flex justify-around mb-6">
+                <div>
+                    <p class="text-sm text-gray-500">Pilihan Anda</p>
+                    <div id="final-player-choice" class="text-6xl my-3 w-20 h-20 mx-auto flex items-center justify-center"></div>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Pilihan AI</p>
+                    <div id="final-bot-choice" class="text-6xl my-3 w-20 h-20 mx-auto flex items-center justify-center"></div>
+                </div>
+            </div>
+            <button onclick="resetGame()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition">
+                Main Lagi
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let playerChoice = null;
+        let botChoice = null;
+        let playerScore = 0;
+        let botScore = 0;
+        let gameRound = 0;
+        let difficulty = 'medium'; // Default difficulty
+        const choices = ['rock', 'paper', 'scissors'];
+        const choiceEmojis = {
+            rock: '✊',
+            paper: '✋',
+            scissors: '✌️'
+        };
+        
+        // DOM elements
+        const playerChoiceElement = document.getElementById('player-choice');
+        const botChoiceElement = document.getElementById('bot-choice');
+        const resultTextElement = document.getElementById('result-text');
+        const playerScoreElement = document.getElementById('player-score');
+        const botScoreElement = document.getElementById('bot-score');
+        const resultOverlay = document.getElementById('result-overlay');
+        const finalResultText = document.getElementById('final-result-text');
+        const finalPlayerChoice = document.getElementById('final-player-choice');
+        const finalBotChoice = document.getElementById('final-bot-choice');
+        const resultDescription = document.getElementById('result-description');
+        const botNameElement = document.getElementById('bot-name');
+        const botNameElement2 = document.getElementById('bot-name-2');
+        const playerAvatar = document.getElementById('player-avatar');
+        const botAvatar = document.getElementById('bot-avatar');
+        
+        // Difficulty settings
+        const difficultySettings = {
+            easy: {
+                name: "Bot Pemula",
+                avatarAlt: "Simple bot beginner difficulty",
+                difficultyColor: "bg-green-500",
+                winRate: 0.3 // 30% chance to win
+            },
+            medium: {
+                name: "Bot Biasa",
+                avatarAlt: "Standard difficulty bot",
+                difficultyColor: "bg-yellow-500",
+                winRate: 0.5 // 50% chance to win
+            },
+            hard: {
+                name: "Bot Master",
+                avatarAlt: "Expert difficulty unbeatable bot",
+                difficultyColor: "bg-red-500",
+                winRate: 1 // Always wins
+            }
+        };
+        
+        // Set difficulty level
+        function setDifficulty(level) {
+            difficulty = level;
+            
+            // Update UI for active difficulty
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('border-2');
+            });
+            
+            const activeBtn = document.querySelector(`.difficulty-btn[data-difficulty="${level}"]`);
+            activeBtn.classList.add('border-2');
+            
+            // Update bot info
+            const settings = difficultySettings[level];
+            botNameElement.textContent = settings.name;
+            botNameElement2.textContent = settings.name;
+            botAvatar.src = `https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/266834d2-62c7-4628-add2-2277e0f6c040.png /g, '+')}`;
+            
+            // Reset game
+            resetGame();
+        }
+        
+        // Select player choice
+        function selectChoice(choice) {
+            if (playerChoice !== null) return; // Prevent changing choice
+            
+            playerChoice = choice;
+            
+            // Update UI
+            document.querySelectorAll('.choice').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            const selectedChoice = document.querySelector(`.choice:nth-child(${choices.indexOf(choice) + 1})`);
+            selectedChoice.classList.add('selected');
+            
+            // Show player choice
+            playerChoiceElement.innerHTML = `<span class="text-6xl">${choiceEmojis[choice]}</span>`;
+            
+            // Bot makes choice
+            setTimeout(() => {
+                makeBotChoice();
+            }, 500);
+        }
+        
+        // Bot makes choice based on difficulty
+        function makeBotChoice() {
+            let choiceIndex;
+            
+            if (difficulty === 'easy') {
+                // Easy bot - random but slightly favors losing
+                choiceIndex = Math.floor(Math.random() * 3);
+                if (Math.random() < 0.3) { // 30% chance to make winning move
+                    const winningChoices = {
+                        rock: 'paper',
+                        paper: 'scissors',
+                        scissors: 'rock'
+                    };
+                    botChoice = winningChoices[playerChoice];
+                } else {
+                    botChoice = choices[choiceIndex];
+                }
+            } 
+            else if (difficulty === 'medium') {
+                // Medium bot - pure random
+                choiceIndex = Math.floor(Math.random() * 3);
+                botChoice = choices[choiceIndex];
+            } 
+            else if (difficulty === 'hard') {
+                // Hard bot - always wins
+                const winningChoices = {
+                    rock: 'paper',
+                    paper: 'scissors',
+                    scissors: 'rock'
+                };
+                botChoice = winningChoices[playerChoice];
+            }
+            
+            // Show bot choice with animation
+            botChoiceElement.innerHTML = '<span class="text-6xl shake">❓</span>';
+            
+            setTimeout(() => {
+                botChoiceElement.innerHTML = `<span class="text-6xl">${choiceEmojis[botChoice]}</span>`;
+                determineWinner();
+            }, 1000);
+        }
+        
+        // Determine winner
+        function determineWinner() {
+            const results = {
+                rock: { rock: 0, paper: -1, scissors: 1 },
+                paper: { rock: 1, paper: 0, scissors: -1 },
+                scissors: { rock: -1, paper: 1, scissors: 0 }
+            };
+            
+            const result = results[playerChoice][botChoice];
+            let resultMessage = '';
+            
+            if (result === 0) {
+                resultMessage = 'Seri!';
+                resultTextElement.innerHTML = `<p class="text-gray-700 font-bold">${resultMessage}</p>`;
+            } else if (result === 1) {
+                resultMessage = 'Anda Menang!';
+                resultTextElement.innerHTML = `<p class="text-green-600 font-bold">${resultMessage}</p>`;
+                playerScore++;
+                playerScoreElement.textContent = playerScore;
+            } else {
+                resultMessage = 'Anda Kalah!';
+                resultTextElement.innerHTML = `<p class="text-red-600 font-bold">${resultMessage}</p>`;
+                botScore++;
+                botScoreElement.textContent = botScore;
+            }
+            
+            gameRound++;
+            
+            // Show result overlay after a short delay
+            setTimeout(() => {
+                showFinalResult(resultMessage);
+            }, 1500);
+        }
+        
+        // Show final result
+        function showFinalResult(resultMessage) {
+            finalResultText.textContent = resultMessage;
+            finalPlayerChoice.innerHTML = choiceEmojis[playerChoice];
+            finalBotChoice.innerHTML = choiceEmojis[botChoice];
+            
+            // Set description based on result and difficulty
+            if (resultMessage.includes('Menang')) {
+                if (difficulty === 'hard') {
+                    resultDescription.textContent = "Kamu sangat hebat!";
+                } else {
+                    resultDescription.textContent = "Kerja bagus!";
+                }
+            } else if (resultMessage.includes('Kalah')) {
+                if (difficulty === 'hard') {
+                    resultDescription.textContent = "Sudah diduga, aku tidak terkalahkan!";
+                } else if (difficulty === 'medium') {
+                    resultDescription.textContent = "Coba lagi, kamu bisa menang!";
+                } else {
+                    resultDescription.textContent = "Mungkin kamu kurang beruntung kali ini!";
+                }
+            } else {
+                resultDescription.textContent = "Main lagi untuk menentukan pemenang!";
+            }
+            
+            // Set color based on result
+            const colors = {
+                'Anda Menang!': 'bg-green-100 text-green-800',
+                'Anda Kalah!': 'bg-red-100 text-red-800',
+                'Seri!': 'bg-yellow-100 text-yellow-800'
+            };
+            
+            resultOverlay.children[0].className = `bg-white rounded-2xl p-8 max-w-md w-full text-center mx-4 ${colors[resultMessage]}`;
+            resultOverlay.classList.remove('hidden');
+        }
+        
+        // Reset game for next round
+        function resetGame() {
+            resultOverlay.classList.add('hidden');
+            
+            setTimeout(() => {
+                playerChoice = null;
+                botChoice = null;
+                playerChoiceElement.innerHTML = '<p class="text-gray-500">Pilihan Anda akan muncul di sini</p>';
+                botChoiceElement.innerHTML = '<p class="text-gray-500">Menunggu pilihan</p>';
+                resultTextElement.innerHTML = '<p class="text-gray-600">Pertarungan dimulai!</p>';
+                
+                document.querySelectorAll('.choice').forEach(el => {
+                    el.classList.remove('selected');
+                });
+            }, 300);
+        }
+        
+        // Initialize game
+        function init() {
+            setDifficulty('medium');
+            
+            // Set player avatar
+            // Avatar already set via HTML
+            
+            // Add shake animation when hovering over choices
+            document.querySelectorAll('.choice').forEach(choice => {
+                choice.addEventListener('mouseover', () => {
+                    choice.classList.add('shake');
+                });
+                
+                choice.addEventListener('mouseout', () => {
+                    choice.classList.remove('shake');
+                });
+            });
+        }
+        
+        // Start game when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
